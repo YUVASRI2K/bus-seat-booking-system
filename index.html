@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Seat Booking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #e3e3e3;
+            border-radius: 8px;
+        }
+        .form-container label {
+            display: block;
+            margin: 10px 0;
+        }
+        .form-container input{
+            width: 85%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #username::placeholder {
+    color: black; /* Change this to any color you prefer */
+}
+        .form-container select {
+            width: 90%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 100px);
+            gap: 10px;
+            justify-content: center;
+            padding: 10px;
+        }
+        .seat {
+            width: 100px;
+            height: 50px;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .seat:hover {
+            background-color: #45a049;
+        }
+        .booked {
+            background-color: red;
+            color: white;
+            cursor: not-allowed;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bus Seat Booking System</h1>
+        
+        <div class="form-container">
+            <label>Username: <input type="text" id="username" placeholder="Enter your name"></label>
+            <label>Gender: 
+                <select id="gender">
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="seats-container">
+            <div class="grid" id="seatGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const totalRows = 8;
+        const totalColumns = 2;
+        const totalSeats = totalRows * totalColumns;
+        const seats = Array.from({ length: totalSeats }, (_, i) => ({
+            seatNo: i + 1,
+            booked: false,
+            bookedBy: null,
+            gender: null
+        }));
+
+        function renderSeats() {
+            const seatGrid = document.getElementById("seatGrid");
+            seatGrid.innerHTML = "";
+            seats.forEach(seat => {
+                const seatDiv = document.createElement("div");
+                seatDiv.classList.add("seat");
+                seatDiv.textContent = `Seat ${seat.seatNo}`;
+                if (seat.booked) {
+                    seatDiv.classList.add("booked");
+                    seatDiv.title = `Booked by: ${seat.bookedBy}\nGender: ${seat.gender}`;
+                } else {
+                    seatDiv.onclick = () => bookSeat(seat);
+                }
+                seatGrid.appendChild(seatDiv);
+            });
+        }
+
+        function bookSeat(seat) {
+            const username = document.getElementById("username").value;
+            const gender = document.getElementById("gender").value;
+
+            if (!username || !gender) {
+                alert("Please fill in all fields to book a seat.");
+                return;
+            }
+            if (seat.booked) {
+                alert("This seat is already booked.");
+                return;
+            }
+            if (gender === "male" && isNextToFemale(seat.seatNo)) {
+                alert("You cannot book this seat next to a female.");
+                return;
+            }
+            
+            seat.booked = true;
+            seat.bookedBy = username;
+            seat.gender = gender;
+            renderSeats();
+            alert(`Seat ${seat.seatNo} booked successfully by ${username}.`);
+        }
+
+        function isNextToFemale(seatNo) {
+            const nearbySeats = [];
+            if (seatNo % totalColumns !== 1) nearbySeats.push(seatNo - 1);
+            if (seatNo % totalColumns !== 0) nearbySeats.push(seatNo + 1);
+            return nearbySeats.some(n => seats[n - 1].booked && seats[n - 1].gender === "female");
+        }
+
+        renderSeats();
+    </script>
+</body>
+</html>
